@@ -1,97 +1,95 @@
-// HDU No.5925 Coconuts (0MS 3612K)
-// 给一副RxC的棋盘，0 < R,C < 1e9，上面有n个障碍, 0 <= n <= 200
-// 问n个障碍将棋盘分成几个连通的区域和这些区域的面积（方格数）
-// 离散化：最直接的搜索限于图的庞大无法直接使用，
-// 发现n<=200，可将图按障碍的坐标离散为400x400的图
-// 进而由搜索求面积
-// 离散的细节：
-// 以前有的点，新图中还会有，并且相邻两点间的距离大于1(即不相邻)时，
-// 将该段距离的间隙当作一个点，并记录其长度
-// 以上所说的离散细节同时应用与x轴和y轴
-// 最后可以对每个间隙记录的两个长度相乘求其面积
-#include <bits/stdc++.h>
+// HDU No.5025 Saving Tang Monk (bfs+状态压缩) (358MS 5200K)
+#include <map>
+#include <queue>
+#include <cctype>
+#include <cstring>
+#include <iostream>
 using namespace std;
-typedef int64_t LL;
-const int maxn = 405;
-const int dir[][2] = {{0,1}, {0,-1}, {1,0}, {-1,0}};
+const int MAX_N = 100;
+typedef pair<int, int> Point;
+struct P {
+	int r, c, steps, key, snake;
+	P(int r=0, int c=0, int s1=0, int k=0, int s2=0):
+		r(r), c(c), steps(s1), key(k), snake(s2) {}
+	bool operator>(const P &p) const { return steps > p.steps; }
+};
 
-int R, C, n;
-int dR, dC;                 // 离散后的行列数
-LL ans[maxn];
-bool g[maxn][maxn];         // 离散后的图，为1代表原图中该点有障碍
-int x[maxn], y[maxn];       // 原始的障碍坐标
-int bx[maxn], by[maxn];     // 原始坐标的副本，用于离散化
-int lx[maxn], ly[maxn];     // 每个点在x，y轴上的长度
-map<int, int> xtab, ytab;   // 原始坐标到离散后坐标的映射
+map<Point, int> snake2bit;	// 将一个有蛇的点映射到一个比特位
+int N, K, sr, sc, tr, tc;
+char A[MAX_N+5][MAX_N+5];
+bool used[MAX_N+5][MAX_N+5][1<<5][10];	// used[r][c][T][K] 有前K把钥匙，打过T的比特所表示的蛇，到达过(r, c)
+char dr[] = {0,0,1,-1}, dc[] = {1,-1,0,0};
 
-int discretize(int *x, int *lx, map<int, int> &xtab, int n)
+int bfs()
 {
-    int dx = 0; // 离散后的点数
-    sort(x, x + n);
-    int cnt = unique(x, x + n) - x;
-    for(int i = 1; i < cnt; ++i) {
-        int dis = x[i] - x[i-1];
-        // 注意lx记录间隙的长度，所以dis-1
-        if(dis > 1) lx[dx++] = dis - 1;
-        // 原有的点在新图要保证也有，所以
-        if(i < cnt-1) { lx[dx] = 1; xtab[x[i]] = dx++; }
-    }
-    return dx;
-}
+	// 因为打蛇的操作会花费时间(即所有边的权值不再相等)
+	// 所以为保证得到最短路径，用优先队列而不用队列（类似于dijkstra)
+	priority_queue<P, vector<P>, greater<P> > que;
 
-void dfs(int x, int y, LL &area)
-{
-    g[x][y] = 0;
-    area += (LL)lx[x] * ly[y];
-    for(int i = 0; i < 4; ++i) {
-        int nx = x + dir[i][0], ny = y + dir[i][1];
-        if(0<=nx&&nx<dR && 0<=ny&&ny<dC && g[nx][ny])
-            dfs(nx, ny, area);
-    }
+	que.push(P(sr, sc));
+	memset(used, 0, sizeof(used));
+	used[sr][sc][0][0] = true;
+
+	while(!que.empty()) {
+		P p = que.top(); que.pop();
+		if(p.r == tr && p.c == tc && p.key == K)	// 拥有了前K把钥匙到达(tr,tc)才算终止
+			return p.steps;
+		for(int i = 0; i < 4; ++i) {
+			int nr = p.r+dr[i], nc = p.c+dc[i];
+			if(0<=nr&&nr<N && 0<=nc&&nc<N && A[nr][nc]!='#' && !used[nr][nc][p.snake][p.key]) {
+				if(A[nr][nc] == '.') {
+					used[nr][nc][p.snake][p.key] = true;
+					que.push(P(nr, nc, p.steps+1, p.key, p.snake));
+				} else if(A[nr][nc] == 'S') {
+					if(p.snake & snake2bit[Point(nr, nc)]) {	// 已打过这条蛇
+						used[nr][nc][p.snake][p.key] = true;
+						que.push(P(nr, nc, p.steps+1, p.key, p.snake));
+					} else {	// 没打过这条蛇
+						int newSnake = p.snake | snake2bit[Point(nr, nc)];
+						used[nr][nc][newSnake][p.key] = true;
+						que.push(P(nr, nc, p.steps+2, p.key, newSnake));
+					}
+				} else if(isdigit(A[nr][nc])) {
+					if(A[nr][nc]-'0' - p.key == 1) {	// 有前n把钥匙才能拿第n+1把
+						used[nr][nc][p.snake][p.key+1] = true;
+						que.push(P(nr, nc, p.steps+1, p.key+1, p.snake));
+					} else {
+						used[nr][nc][p.snake][p.key] = true;
+						que.push(P(nr, nc, p.steps+1, p.key, p.snake));
+					}
+				}
+			}
+		}
+	}
+	return -1;
 }
 
 int main()
 {
-    int T;
-    scanf("%d", &T);
+	while(cin >> N >> K) {
+		if(N == 0 && K == 0) break;
 
-    for(int kase = 1; kase <= T; ++kase) {
-        scanf("%d%d%d", &R, &C, &n);
-        for(int i = 0; i < n; ++i) {
-            scanf("%d%d", &x[i], &y[i]);
-            bx[i] = x[i], by[i] = y[i];
-        }
-        // 在点集中加入边界外一点
-        // 以方便计算最边缘的点与边界的距离
-        bx[n] = 0, bx[n+1] = R+1;
-        by[n] = 0, by[n+1] = C+1;
-        // 离散化行列
-        dR = discretize(bx, lx, xtab, n+2);
-        dC = discretize(by, ly, ytab, n+2);
-        // 构造离散化后的图
-        for(int i = 0; i < dR; ++i)
-            for(int j = 0; j < dC; ++j)
-                g[i][j] = 1;
-        for(int i = 0; i < n; ++i)
-            g[xtab[x[i]]][ytab[y[i]]] = 0;
-        // 计算面积
-        int ans_cnt = 0;
-        for(int i = 0; i < dR; ++i) {
-            for(int j = 0; j < dC; ++j) {
-                if(g[i][j]) {
-                    LL area = 0;
-                    dfs(i, j, area);
-                    ans[ans_cnt++] = area;
-                }
-            }
-        }
-        sort(ans, ans + ans_cnt);
-
-        printf("Case #%d:\n", kase);
-        printf("%d\n", ans_cnt);
-        printf("%lld", ans[0]);
-        for(int i = 1; i < ans_cnt; ++i)
-            printf(" %lld", ans[i]);
-        putchar('\n');
-    }
+		int snakeCnt = 0;
+		for(int i = 0; i < N; ++i) {
+			for(int j = 0; j < N; ++j) {
+				cin >> A[i][j];
+				if(A[i][j] == 'K') {
+					A[i][j] = '.';
+					sr = i, sc = j;
+				} else if(A[i][j] == 'T') {
+					A[i][j] = '.';
+					tr = i, tc = j;
+				} else if(A[i][j] == 'S') {
+					snake2bit[Point(i, j)] = 1 << snakeCnt;
+					++snakeCnt;
+				}
+			}
+		}
+		int ans = bfs();
+		if(ans == -1)
+			cout << "impossible" << endl;
+		else
+			cout << ans << endl;
+	}
+	return 0;
 }

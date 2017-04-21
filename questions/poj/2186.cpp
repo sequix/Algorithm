@@ -1,4 +1,4 @@
-// POJ No.2186 Popular Cows (1140K 47MS)
+// POJ No.2186 Popular Cows (1256K 47MS)
 // 给一有向图，问能被其他所有点到达的的点的个数。
 // Tarjan对所有的强连通分量缩点
 // 若新图中仅有一个叶子结点，则该结点在原图中对应的点均符合条件
@@ -20,10 +20,11 @@ int belong[maxn];
 int top, stk[maxn];
 bool instk[maxn];
 
-int egc, head[maxn];
+// head0原图，head1缩点后的图
+int egc, head0[maxn], head1[maxn];
 struct edge { int v, next; } eg[maxm * 2];
 
-void addedge(int u, int v)
+void addedge(int u, int v, int *head)
 {
     eg[egc] = (edge){v, head[u]}, head[u] = egc++;
 }
@@ -31,7 +32,8 @@ void addedge(int u, int v)
 void init()
 {
     top = depth = nscc = egc = 0;
-    memset(head, -1, sizeof(head));
+    memset(head0, -1, sizeof(head0));
+    memset(head1, -1, sizeof(head1));
     memset(otd, 0, sizeof(otd));
     memset(low, 0, sizeof(low));
     memset(dfn, 0, sizeof(dfn));
@@ -44,7 +46,7 @@ void tarjan(int u)
     stk[top++] = u;
     instk[u] = 1;
     low[u] = dfn[u] = ++depth;
-    for(int p = head[u]; ~p; p = eg[p].next) {
+    for(int p = head0[u]; ~p; p = eg[p].next) {
         int v = eg[p].v;
         if(!dfn[v]) {
             tarjan(v);
@@ -72,9 +74,12 @@ int solve()
     // 构图
     for(int u = 1; u <= n; ++u) {
         int bu = belong[u];
-        for(int p = head[u]; ~p; p = eg[p].next) {
+        for(int p = head0[u]; ~p; p = eg[p].next) {
             int v = eg[p].v, bv = belong[v];
-            if(bu != bv) ++otd[bu];
+            if(bu != bv) {
+                addedge(bu, bv, head1);
+                ++otd[bu];
+            }
         }
     }
     int pz, nz = 0;
@@ -91,7 +96,7 @@ int main()
     scanf("%d%d", &n, &m);
     for(int i = 0; i < m; ++i) {
         scanf("%d%d", &u, &v);
-        addedge(u, v);
+        addedge(u, v, head0);
     }
     printf("%d\n", solve());
 }
