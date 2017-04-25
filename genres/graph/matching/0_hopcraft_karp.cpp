@@ -4,8 +4,7 @@ struct edge { int v, next; } eg[maxm];
 
 void addedge(int u, int v)
 {
-    eg[egc] = (edge){v, head[u]};
-    head[u] = egc++;
+    eg[egc] = (edge){v, head[u]}, head[u] = egc++;
 }
 
 int dis;            // 当前增广路的长度

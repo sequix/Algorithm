@@ -6,7 +6,6 @@ using namespace std;
 const int maxn = 1e3 + 10;
 const int maxm = 1e4 + 10;
 const int inf = 0x3f3f3f3f;
-typedef pair<int, int> P;
 
 int n, m, s, f;
 int num[maxn][2];
