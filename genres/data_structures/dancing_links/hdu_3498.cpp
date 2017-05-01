@@ -33,10 +33,16 @@ struct DLX {
             L[R[i]] = R[L[i]] = i;
         }
     }
+    // 与精确覆盖不同:
+    //     remove的参数c是一个1的编号，不是某一列
+    //     仅删一列，而不是某一列及其所覆盖的行
     void remove(int c) {
         for(int i = D[c]; i != c; i = D[i])
             L[R[i]] = L[i], R[L[i]] = R[i];
     }
+    // 与精确覆盖不同:
+    //     resume的参数c是一个1的编号，不是某一列
+    //     仅恢复一列，而不是某一列及其所覆盖的行
     void resume(int c) {
         for(int i = U[c]; i != c; i = U[i])
             L[R[i]] = R[L[i]] = i;
@@ -55,18 +61,16 @@ struct DLX {
         return ans;
     }
     void dfs(int dep) {
-        int ret, c;
         if(R[0] == 0) { ans = min(ans, dep); return; }
         // 注意这里：
         //   如果当前代价 + 预计代价 >= 已得到的结果
         //   则没有必要继续搜索
         if(dep + predictedDistance() >= ans) return;
 
-        c = R[0];
+        int c = R[0];
         for(int i = R[0]; i != 0; i = R[i])
             if(ccnt[i] < ccnt[c]) c = i;
-        for(int i = D[c]; i != c; i = D[i]) {
-            remove(i);
+        for(int i = D[c]; i != c; i = D[i]) { remove(i);
             for(int j = R[i]; j != i; j = R[j])
                 remove(j);
             dfs(dep+1);
