@@ -42,7 +42,8 @@ struct DLX {
             L[R[p]] = R[hr[r]] = p;
         }
     }
-    // 删除c列，及其所覆盖的行
+    // 删除c列，及这些元素所覆盖的行
+    // 但并没有删除这些行所覆盖到的其他列
     void remove(int c) {
         L[R[c]] = L[c];
         R[L[c]] = R[c];
@@ -75,6 +76,8 @@ struct DLX {
         remove(c);
         for(int i = D[c]; i != c; i = D[i]) {
             ans[dep] = row[i];
+            // 如果选择了这一行，就要将该行所能覆盖到的且它列删掉
+            // 以保证每一列仅由一个1来覆盖
             for(int j = R[i]; j != i; j = R[j])
                 remove(col[j]);
             if(ret = dfs(dep+1))

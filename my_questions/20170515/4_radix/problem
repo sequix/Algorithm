@@ -1,0 +1,44 @@
+Time Limit: 1000 ms
+Space Limit: 64 MiB
+
+Description
+
+Ten radix representation is natural to humans for practical reasons.
+But it's not true for everyone. Now those who is anti-ten-radix are
+asking you solve a problem:
+
+Given a number in N radix, decide whether it is multiple of N-1.
+
+Input
+
+There are multiple test cases.
+For every case, the first line gives N, M (1 <= N,M <= 1e3),
+the fallowing are M positive integers within 32-bit two's
+complement range, indicating the number in N radix
+from the lowest valid digit to the highest one.
+
+Output
+
+Output 1 if the number is a multiple of N-1, otherwise, 0.
+
+Sample Input
+
+7 3
+4 6 1
+7 3
+5 6 1
+13 2
+12 12
+
+Sample Output
+
+0
+1
+1
+
+Hint
+
+In first case,
+"164" in 7 radix == "95" in 10 radix, and 95 is not a multiple of 6.
+In second case,
+"164" in 7 radix == "96" in 10 radix, and 96 is a multiple of 6.

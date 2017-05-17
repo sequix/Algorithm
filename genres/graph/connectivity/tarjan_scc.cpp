@@ -14,7 +14,7 @@ void dfs(int u)
     for(int p = head[u]; ~p; p = eg[p].next) {
         int v = eg[p].v;
         if(!dfn[v]) {
-            tarjan(v, u, dep+1);
+            dfs(v);
             low[u] = min(low[u], low[v]);
         } else if(instk[v]) {
             low[u] = min(low[u], dfn[v]);
@@ -35,3 +35,5 @@ void tarjan()
     for(int i = 0; i < n; ++i)  // 图的结点从0开始
         if(!dfn[i]) dfs(i);
 }
+
+

@@ -71,6 +71,10 @@ struct DLX {
         for(int i = R[0]; i != 0; i = R[i])
             if(ccnt[i] < ccnt[c]) c = i;
         for(int i = D[c]; i != c; i = D[i]) { remove(i);
+            // 若选择该行，则将该行能覆盖的所有列去掉
+            // 但并没有去掉其所能覆盖到的行
+            // 所以接下来的搜索中还是有可能选到之前列被去掉过的行
+            // 即某一列可以被重复覆盖到
             for(int j = R[i]; j != i; j = R[j])
                 remove(j);
             dfs(dep+1);

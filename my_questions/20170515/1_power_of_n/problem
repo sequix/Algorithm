@@ -1,0 +1,34 @@
+Time Limit: 1000 ms
+Space Limit: 64 MiB
+
+Description
+
+Given a pair of integers (A, B), you are required to judge
+whether A is a power of B.
+
+Input
+
+An integer T, indicating the number of test cases.
+For every case, there is a line containing (A, B).
+It is guaranteed that 0 <= A, B <= 1e18 and 1 <= T <= 1e6
+
+Output
+
+If A is a power of B, output 1, otherwise, output 0.
+
+Sample Input
+
+5
+2 2
+3 2
+4 2
+5 2
+6 2
+
+Sample Output
+
+1
+0
+1
+0
+0

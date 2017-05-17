@@ -1,0 +1,25 @@
+Time Limit: 1000 ms
+Space Limit: 64 MiB
+
+Description
+
+Output the lexicographic first Longest-Increasing-Sequence.
+
+Input
+
+There are multiple test cases.
+For every case, the first line gives N (1 <= N <= 1e6),
+the fallowing are N integers within 32-bit two's complement range.
+
+Output
+
+The lexicographic first LIS separated with space.
+
+Sample Input
+
+6
+4 1 6 9 2 3
+
+Sample Output
+
+1 2 3
